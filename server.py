@@ -56,7 +56,7 @@ def main():
         print("[+] Authenticated!")
         print(chan.recv(1024))
         while True:
-            command = input("[x]>>>").strip('\n')
+            command = str(input(">>>").strip('\n')).encode()
             chan.send(command)
             print(str(chan.recv(1024)) + str('\n'))
     except Exception as exc:

