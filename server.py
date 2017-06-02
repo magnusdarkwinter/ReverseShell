@@ -12,7 +12,7 @@ USERNAME = "root"
 PASSWORD = "toor"
 HOSTKEY = paramiko.RSAKey(filename=KEYNAME)
 
-class Server(paramiko.ServerInterface):
+class ParamikoServer(paramiko.ServerInterface):
     '''Paramiko server to connect via ssh'''
     def __init__(self):
         self.event = threading.Event()
@@ -24,14 +24,14 @@ class Server(paramiko.ServerInterface):
         if (username == USERNAME) and (password == PASSWORD):
             return paramiko.AUTH_SUCCESSFUL
         return paramiko.AUTH_FAILED
-
+        
 def main():
     '''Entry point if called as an exeutable'''
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         sock.bind((HOST, PORT))
-        sock.listen(100)
+        sock.listen(1)
         print("[+] Listening for connection...")
         client, addr = sock.accept()
     except Exception as exc:
@@ -47,18 +47,18 @@ def main():
             print("[-] Failed to load moduli: gex will be unsupported.")
             raise
         transport.add_server_key(HOSTKEY)
-        server = Server()
+        server = ParamikoServer()
         try:
             transport.start_server(server=server)
         except paramiko.SSHException:
             print("[-] SSH negotiation failed.")
         chan = transport.accept(20)
         print("[+] Authenticated!")
-        print(chan.recv(1024))
+        print(chan.recv(1024).decode())
         while True:
             command = str(input(">>>").strip('\n')).encode()
             chan.send(command)
-            print(str(chan.recv(1024)) + str('\n'))
+            print("[!] " + chan.recv(1024).decode() + '\n')
     except Exception as exc:
         print("[-] Caught exception: \n" + str(exc))
         try:
